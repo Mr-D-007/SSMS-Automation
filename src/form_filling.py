@@ -1,0 +1,38 @@
+from .driver import By, Keys, Select, EC, os
+from time import sleep
+
+def form(driver, actions, wait):
+    wait.until(EC.presence_of_element_located((By.LINK_TEXT, "NEW BOOKING"))).click()
+    new_window = driver.window_handles[-1]
+    driver.switch_to.window(new_window)
+    sleep(1)
+    dropdown = driver.find_element(By.CSS_SELECTOR, ".Dropdown")
+    dropdown.find_element(By.XPATH, f'.//option[@value="{os.getenv("DISCTRICT_CODE")}"]').click()
+    sleep(1)
+    driver.find_element(By.XPATH, "//*[@class='GridviewScrollItem']//td//input").click()
+    sleep(1)
+    driver.find_element(By.XPATH, "//tr[th[contains(text(), 'Customer GSTIN')]]/td/input").click()
+    sleep(1)
+    actions.send_keys(os.getenv("GSTIN")).perform()
+    sleep(1)
+    actions.send_keys(Keys.TAB).perform()
+    sleep(1)
+    select_element = wait.until(EC.presence_of_element_located((By.ID, "ccMain_ddlsandpurpose")))
+    sleep(1)
+    dropdown = Select(select_element)
+    dropdown.select_by_visible_text("Commercial")
+    sleep(1)
+    actions.send_keys(Keys.TAB).perform()
+    sleep(1)
+    actions.send_keys(os.getenv("VEHICLE_NUMBER")).perform()
+    sleep(1)
+    actions.send_keys(Keys.TAB).perform()
+    sleep(1)
+    district_select = driver.find_element(By.XPATH, "//tr[th[contains(., 'District')]]/td[1]/select")
+    sleep(1)
+    district_dropdown = Select(district_select)
+    sleep(1)
+    district_codes = os.getenv("DISCTRICT_MAP")
+    district_dropdown.select_by_visible_text(district_codes[os.get("DISCTRICT_CODE")])
+    sleep(1)
+    
