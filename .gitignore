@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+.vscode
 build/
 develop-eggs/
 dist/
@@ -25,6 +26,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+test.py
+captcha_processed.png
+chromedriver-win64
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -130,6 +134,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+automation_env
 env/
 venv/
 ENV/
