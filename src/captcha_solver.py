@@ -16,7 +16,7 @@ reader = easyocr.Reader(['en'], gpu=False)
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
 
 
-def extract_captcha_text(driver, id) -> str:
+def extract_captcha_text(driver, element_id) -> str:
     """
     Extracts and returns uppercase alphanumeric captcha text from a webpage using OCR.
     
@@ -28,7 +28,7 @@ def extract_captcha_text(driver, id) -> str:
     """
     try:
         # Locate the captcha image element
-        captcha_element = driver.find_element(By.XPATH, f'//*[@id="{id}"]')
+        captcha_element = driver.find_element(By.XPATH, f'//*[@id="{element_id}"]')
 
         # Take a screenshot of the captcha element
         captcha_png = captcha_element.screenshot_as_png
@@ -55,8 +55,65 @@ def extract_captcha_text(driver, id) -> str:
         print(f"Error extracting captcha: {e}")
         return ""
 
-def extract_captcha_text_2():
-    reader = easyocr.Reader(['en'])
-    result = reader.readtext("captcha_processed.png")
-    os.remove("captcha_processed.png")
-    return " ".join([res[1] for res in result]).upper()
+
+# import io
+# import re
+# import base64
+# from PIL import Image
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.remote.webdriver import WebDriver
+# import openai
+
+# # Set your API key
+# openai.api_key = os.getenv('OPENAI_API_KEY')
+
+
+# def extract_captcha_text(driver: WebDriver, element_id: str) -> str:
+#     """
+#     Extracts CAPTCHA text from a webpage using OpenAI's GPT-4o model.
+    
+#     Args:
+#         driver (WebDriver): Selenium WebDriver instance.
+#         element_id (str): The HTML ID of the CAPTCHA image.
+
+#     Returns:
+#         str: Cleaned CAPTCHA string (uppercase alphanumeric), or empty string if failed.
+#     """
+#     try:
+#         # Locate the CAPTCHA image element
+#         captcha_element = driver.find_element(By.ID, element_id)
+
+#         # Capture the CAPTCHA image as PNG
+#         captcha_png = captcha_element.screenshot_as_png
+#         captcha_base64 = base64.b64encode(captcha_png).decode('utf-8')
+
+#         # Create GPT-4o API prompt
+#         response = openai.ChatCompletion.create(
+#             model="gpt-4o",
+#             messages=[
+#                 {
+#                     "role": "user",
+#                     "content": [
+#                         {"type": "text", "text": "Please extract the text from this CAPTCHA image. Only return the exact text, no explanation."},
+#                         {
+#                             "type": "image_url",
+#                             "image_url": {
+#                                 "url": f"data:image/png;base64,{captcha_base64}"
+#                             }
+#                         }
+#                     ]
+#                 }
+#             ],
+#             max_tokens=20
+#         )
+
+#         # Extract and clean the response
+#         raw_text = response['choices'][0]['message']['content'].strip()
+#         cleaned_text = re.sub(r'[^A-Z0-9]', '', raw_text.upper())
+
+#         print(f"Extracted CAPTCHA: '{cleaned_text}'")
+#         return cleaned_text
+
+#     except Exception as e:
+#         print(f"[ERROR] Failed to extract CAPTCHA using GPT-4o: {e}")
+#         return ""

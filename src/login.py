@@ -1,4 +1,4 @@
-from .captcha_solver import extract_captcha_text, extract_captcha_text_2
+from .captcha_solver import extract_captcha_text
 from .utils import check_failure, check_timer
 from .driver import Keys, By
 from time import sleep
@@ -12,8 +12,8 @@ def login(driver, actions):
     """
     try:
         driver.get(os.getenv("BASE_URL"))
-        # sleep(2)
-        # driver.refresh()
+        sleep(2)
+        driver.refresh()
         sleep(2)
         form_element = driver.find_element(By.ID, 'divd')
         user_element = form_element.find_element(By.XPATH, './input')
@@ -26,15 +26,10 @@ def login(driver, actions):
         actions.send_keys(os.getenv("PASSWORD")).perform()
         sleep(2)
         captcha_element = driver.find_element(By.ID, 'txtEnterCode')
-        # captcha_element.click()
         sleep(2)
-        captcha_text = extract_captcha_text(driver, id="imgCaptcha")
+        captcha_text = extract_captcha_text(driver, element_id="imgCaptcha")
         print(f'Captcha Text: {captcha_text}')
         captcha_element.send_keys(captcha_text)
-        # error = driver.find_elements(By.ID, "RequiredFieldValidator2")
-        # if error:
-        #     print('Error while entering Captcha.')
-        #     login(driver, actions)
         sleep(2)
         check_timer(driver, By)
         login_button = driver.find_element(By.ID, "btnLogin")

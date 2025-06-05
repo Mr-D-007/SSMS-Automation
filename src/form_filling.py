@@ -1,40 +1,30 @@
 from .driver import By, Keys, Select, EC, os
 from .captcha_solver import extract_captcha_text
 from time import sleep
-import json
+from .utils import check_timer
 
 def form(driver, actions, wait):
     wait.until(EC.presence_of_element_located((By.LINK_TEXT, "NEW BOOKING"))).click()
     new_window = driver.window_handles[-1]
     driver.switch_to.window(new_window)
     sleep(1)
-    # Find the select element by its ID
     select_element = driver.find_element(By.CLASS_NAME, "Dropdown")
-    # Create a Select object
     select = Select(select_element)
-    # Select by value
     select.select_by_value("24")
     print("Selected 'BHADRADRI KOTHAGUDEM' by value.")
     sleep(1)
-    # Wait for the table to be present and visible
     table = wait.until(
         EC.presence_of_element_located((By.CLASS_NAME, "MasterpageLayout"))
     )
     sleep(2)
-    # Find the first radio button input within the table
-    # We use find_element (singular) because we only want the first one
     first_radio_button = table.find_element(By.XPATH, ".//input[@type='radio']")
-    # Scroll into view if necessary (optional, but good practice for interaction)
     driver.execute_script("arguments[0].scrollIntoView(true);", first_radio_button)
     sleep(0.5) # Small pause for scrolling animation
-    # Click the radio button
     first_radio_button.click()
     sleep(1)
     driver.find_element(By.XPATH, "//*[@class='GridviewScrollItem']//td//input").click()
     sleep(1)
     driver.find_element(By.XPATH, "//tr[th[contains(text(), 'Customer GSTIN')]]/td/input").click()
-    # sleep(1)
-    # actions.send_keys(os.getenv("GSTIN")).perform()
     sleep(1)
     actions.send_keys(Keys.TAB).perform()
     sleep(1)
@@ -72,19 +62,29 @@ def form(driver, actions, wait):
             print(f"Selected: {select.first_selected_option.text}")
         else:
             print("No selectable options found in the dropdown besides '--Select--'.")
-    captcha_text = extract_captcha_text(driver, id="ccMain_imgCaptcha")
-    captcha_element = driver.find_element(By.ID, "ccMain_txtCECode")
-    captcha_element.click()
-    sleep(1)
-    actions.send_keys(captcha_text)
     radio_button_xpath = "//input[@type='radio' and @value='PAYU']"
-
-    # Wait until the element is clickable
     payu_radio_button = wait.until(
         EC.element_to_be_clickable((By.XPATH, radio_button_xpath))
     )
-
-    # Click the radio button
     payu_radio_button.click()
+    sleep(2)
     print("Clicked the radio button with value 'PAYU' using XPath.")
-    input()
+    captcha_filler(driver, actions)
+    check_timer(driver, By)
+    try:
+        error = driver.switch_to.alert.text
+        if 'captcha' in error:
+            print('Can not fill captcha.')
+            driver.quit()
+    except Exception as e:
+        print()
+    register_button = driver.find_element(By.ID, "btnRegister")
+    register_button.click()
+    check_timer(driver, By)
+
+def captcha_filler(driver, actions):
+    captcha_text = extract_captcha_text(driver, element_id="ccMain_imgCaptcha")
+    captcha_element = driver.find_element(By.ID, "ccMain_txtCECode")
+    captcha_element.click()
+    sleep(1)
+    actions.send_keys(captcha_text).perform()
